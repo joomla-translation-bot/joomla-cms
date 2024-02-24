@@ -1,8 +1,8 @@
-name: Create translation pull request
+name: Create translation pull request J5
 
 on:
   push:
-    branches: [ translation ]
+    branches: [ translation5 ]
 
   workflow_dispatch:
 
@@ -19,12 +19,13 @@ jobs:
       contents: write  # for Git to git push
     runs-on: ubuntu-latest
     # Only run this action the translation-bot repository in the translation branch
-    if: ${{ github.repository == 'joomla-translation-bot/joomla-cms' && github.ref == 'refs/heads/translation5' }}
+    if: (github.event_name == 'schedule' && github.repository == 'joomla-translation-bot/joomla-cms') || (github.event_name != 'schedule')
 
     steps:
       - uses: actions/checkout@v3
         # We need the full depth to create / update the pull request against the main repo
         with:
+          ref: translation5
           fetch-depth: 0
       - uses: actions/setup-node@v3
         with:
@@ -73,5 +74,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.API_TOKEN_GITHUB }}
         run: |
-          gh pr list -R joomla/joomla-cms --state open --author joomla-translation-bot -S "[5.x] Translation Update" | grep -v "No pull" || \
+          gh pr list -R joomla/joomla-cms --state open --author joomla-translation-bot -S "[5.x] Translation Update" --base 5.1-dev | grep -v "No pull" || \
             gh pr create --title "[5.x] Translation Update" --body "Automatically created pull request based on core-translation repository changes" -R joomla/joomla-cms --base 5.1-dev
